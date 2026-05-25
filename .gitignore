@@ -1,0 +1,17 @@
+# 数据文件 (太大，不提交)
+data/*.csv
+
+# 输出结果
+output/
+
+# Python
+__pycache__/
+*.pyc
+.venv*/
+venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.iml
