@@ -1,8 +1,8 @@
 # 数据文件 (太大，不提交)
 data/*.csv
 
-# 输出结果
-output/
+# 输出结果中的CSV不提交（可选），图表PNG要提交
+output/*.csv
 
 # Python
 __pycache__/
