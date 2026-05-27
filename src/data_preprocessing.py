@@ -1,11 +1,6 @@
 """
 数据加载与预处理模块。
 
-完成以下任务：
-  1. 从 CSV 加载 6 张原始表
-  2. 处理缺失值、类型转换
-  3. 多表合并构建分析宽表
-  4. 输出数据质量报告
 """
 
 import pandas as pd
@@ -14,7 +9,6 @@ from config import DATA_DIR, DATA_FILES
 
 
 def load_all_tables() -> dict[str, pd.DataFrame]:
-    """加载所有 CSV 文件并返回字典。"""
     tables = {}
     for name, filename in DATA_FILES.items():
         path = f"{DATA_DIR}/{filename}"
@@ -28,7 +22,7 @@ def load_all_tables() -> dict[str, pd.DataFrame]:
 
 
 def check_missing(df: pd.DataFrame, name: str) -> None:
-    """检查缺失值并打印报告。"""
+    """检查缺失值"""
     missing = df.isnull().sum()
     missing = missing[missing > 0]
     if len(missing) > 0:
@@ -62,7 +56,7 @@ def build_analysis_table(
         .merge(aisles, on="aisle_id", how="left")
     )
 
-    # 合并订单 + 商品明细
+    # 合并订单+商品明细
     df = (
         order_products
         .merge(orders[["order_id", "user_id", "order_number",
@@ -79,26 +73,26 @@ def build_analysis_table(
 def preprocess(verbose: bool = True) -> pd.DataFrame:
     """
     主预处理流程：
-      加载 → 检查 → 清洗 → 合并 → 返回分析宽表。
+      加载→检查→清洗→合并→返回分析宽表。
     """
     tables = load_all_tables()
 
-    # --- 缺失值检查 ---
+    # 缺失值检查
     if verbose:
         for name, df in tables.items():
             check_missing(df, name)
 
-    # --- 清洗 orders ---
+    # 清洗
     orders = tables["orders"].copy()
     # days_since_prior_order 首单为 NaN，填充为 0
     orders["days_since_prior_order"] = orders["days_since_prior_order"].fillna(0)
 
-    # --- 清洗 products ---
+    # 清洗
     products = tables["products"].copy()
     departments = tables["departments"].copy()
     aisles = tables["aisles"].copy()
 
-    # --- 构建分析宽表 ---
+    # 构建分析宽表
     df = build_analysis_table(
         orders=orders,
         order_products=tables["order_products_prior"],

@@ -1,10 +1,7 @@
 """
 队列留存分析 (Cohort Retention)。
 
-方法：
-  1. 按用户首购周划分 Cohort
-  2. 跟踪每 Cohort 在后续各周的留存情况
-  3. 输出留存热力图矩阵
+方法：1. 按用户首购周划分 Cohort 2. 跟踪每 Cohort 在后续各周的留存情况 3. 输出留存热力图矩阵
 """
 
 import pandas as pd
@@ -18,26 +15,16 @@ def build_cohort_matrix(
 ) -> pd.DataFrame:
     """
     构建 Cohort 留存矩阵。
-
-    Parameters
-    ----------
-    orders : 原始 orders 表
-    period : 时间粒度 ('W' = 周, 'M' = 月)
-
-    Returns
-    -------
-    retention_matrix : index=cohort_period, columns=period_offset, values=retention_rate
     """
     df = orders[["user_id", "order_id", "order_number", "days_since_prior_order"]].copy()
 
-    # 由于原始数据没有绝对日期，我们通过累计 days_since_prior_order 推算每个订单的"相对天数"
-    # 首单 days_since_prior_order 为 NaN，需填充 0 否则 cumsum 会传播 NaN
+    # 通过累计 days_since_prior_order 推算每个订单的"相对天数"
     df["days_since_prior_order"] = df["days_since_prior_order"].fillna(0)
 
-    # 首单为第 0 天，后续订单累加间隔天数
+    # 首单为第0天，后续订单累加间隔天数
     df["cumulative_days"] = df.groupby("user_id")["days_since_prior_order"].cumsum()
 
-    # 每个用户的首次购买日期 (作为 cohort 锚点)
+    # 每个用户的首次购买日期
     first_purchase = df.groupby("user_id")["cumulative_days"].min().reset_index()
     first_purchase.columns = ["user_id", "first_day"]
 
@@ -51,7 +38,7 @@ def build_cohort_matrix(
         df["cohort_period"] = (df["first_day"] // 30).astype(int)
         df["activity_period"] = (df["days_since_first"] // 30).astype(int)
 
-    # Cohort 大小 (每 cohort 的用户数)
+    # Cohort大小
     cohort_size = (
         df.groupby("cohort_period")["user_id"]
         .nunique()
@@ -81,18 +68,17 @@ def build_cohort_matrix(
     )
 
     print(f"\n[Cohort] 留存矩阵构建完成")
-    print(f"  Cohort 数: {len(matrix)}")
-    print(f"  最大 Period: {matrix.columns.max()}")
+    print(f"Cohort 数: {len(matrix)}")
+    print(f"最大Period: {matrix.columns.max()}")
 
     return matrix
 
 
 def cohort_summary(matrix: pd.DataFrame) -> pd.DataFrame:
-    """输出每个 cohort 在关键节点的留存率汇总。"""
+    """输出每个cohort在关键节点的留存率汇总。"""
     # 确保列索引是整数
     matrix.columns = matrix.columns.astype(int)
 
-    # 取前 12 期的留存 (如果有的话)
     cols_available = [c for c in [0, 1, 2, 3, 4, 7, 11] if c in matrix.columns]
 
     summary = matrix[cols_available].copy()
@@ -105,7 +91,7 @@ def cohort_summary(matrix: pd.DataFrame) -> pd.DataFrame:
 
 
 def run_cohort_pipeline(orders: pd.DataFrame) -> pd.DataFrame:
-    """一键执行 Cohort 分析全流程。"""
+    """一键执行Cohort分析全流程"""
     matrix = build_cohort_matrix(orders)
     cohort_summary(matrix)
 
@@ -121,6 +107,5 @@ if __name__ == "__main__":
     from data_preprocessing import preprocess
     import pandas as pd
 
-    # 直接加载 orders 表
     orders = pd.read_csv("../data/orders.csv")
     matrix = run_cohort_pipeline(orders)

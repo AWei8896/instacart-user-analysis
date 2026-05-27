@@ -1,5 +1,5 @@
 """
-数据可视化模块 — 共 7 张核心图表。
+数据可视化模 共7张图表。
 
 图表清单：
   1. 复购周期分布直方图
@@ -21,16 +21,16 @@ from config import OUTPUT_DIR, FIGURE_DPI, FIGURE_SIZE_DEFAULT, TOP_N
 
 
 def safe_save(fig, filename: str) -> None:
-    """保存图片到输出目录。"""
+    """保存图片到输出目录"""
     path = f"{OUTPUT_DIR}/{filename}"
     fig.savefig(path, dpi=FIGURE_DPI, bbox_inches="tight", facecolor="white")
     print(f"  [SAVED] {path}")
     plt.close(fig)
 
 
-# ---- 图表 1: 复购周期分布 ----
+# 图表 1:复购周期分布
 def plot_repurchase_interval(df: pd.DataFrame) -> None:
-    """用户复购间隔天数分布直方图。"""
+    """用户复购间隔天数分布直方图"""
     fig, ax = plt.subplots(figsize=FIGURE_SIZE_DEFAULT)
 
     intervals = df[df["days_since_prior_order"] > 0]["days_since_prior_order"]
@@ -56,14 +56,14 @@ def plot_repurchase_interval(df: pd.DataFrame) -> None:
     safe_save(fig, "01_repurchase_interval_distribution.png")
 
 
-# ---- 图表 2: Cohort 留存热力图 ----
+# 图表 2: Cohort 留存热力图
 def plot_cohort_heatmap(matrix: pd.DataFrame) -> None:
     """用户周留存率热力图。"""
     if matrix.empty:
         print("  [SKIP] Cohort matrix is empty")
         return
 
-    # 取前 12 cohort, 前 12 周
+    # 取前 12 cohort, 前12周
     rows_to_show = min(len(matrix), 12)
     cols_to_show = min(len(matrix.columns), 12)
     m = matrix.iloc[:rows_to_show, :cols_to_show].copy()
@@ -84,7 +84,7 @@ def plot_cohort_heatmap(matrix: pd.DataFrame) -> None:
     safe_save(fig, "02_cohort_retention_heatmap.png")
 
 
-# ---- 图表 3: RFM 用户分层饼图 ----
+# 图表 3: RFM 用户分层饼图
 def plot_rfm_pie(rfm: pd.DataFrame) -> None:
     """各层级用户占比饼图。"""
     if "ltv_label" not in rfm.columns:
@@ -111,7 +111,7 @@ def plot_rfm_pie(rfm: pd.DataFrame) -> None:
     safe_save(fig, "03_rfm_user_tiers_pie.png")
 
 
-# ---- 图表 4: RFM 分层雷达图 ----
+# 图表 4: RFM 分层雷达图
 def plot_rfm_radar(rfm: pd.DataFrame) -> None:
     """各层用户的 RFM 三维度雷达图。"""
     radar_data = rfm.groupby("ltv_label", observed=False).agg(
@@ -146,7 +146,7 @@ def plot_rfm_radar(rfm: pd.DataFrame) -> None:
     safe_save(fig, "04_rfm_radar_chart.png")
 
 
-# ---- 图表 5: 品类复购率 Top-N 柱状图 ----
+# 图表 5: 品类复购率 Top-N 柱状图
 def plot_dept_reorder(dept_reorder: pd.DataFrame) -> None:
     """品类复购率水平柱状图。"""
     if dept_reorder.empty or "reorder_rate" not in dept_reorder.columns:
@@ -172,7 +172,7 @@ def plot_dept_reorder(dept_reorder: pd.DataFrame) -> None:
     safe_save(fig, "05_dept_reorder_rate_top15.png")
 
 
-# ---- 图表 6: 品类连带率热力图 ----
+# 图表 6: 品类连带率热力图
 def plot_association_heatmap(assoc_df: pd.DataFrame) -> None:
     """品类间连带率矩阵热力图。"""
     if assoc_df.empty:
@@ -190,7 +190,7 @@ def plot_association_heatmap(assoc_df: pd.DataFrame) -> None:
 
     dept_list = all_depts.index.tolist()
     n = len(dept_list)
-    # 初始化矩阵，对角 = 100
+    # 初始化矩阵,对角=100
     matrix = pd.DataFrame(np.eye(n) * 100, index=dept_list, columns=dept_list)
 
     for _, row in assoc_df.iterrows():
@@ -213,7 +213,7 @@ def plot_association_heatmap(assoc_df: pd.DataFrame) -> None:
     safe_save(fig, "06_category_association_heatmap.png")
 
 
-# ---- 图表 7: 订单时段热力图 ----
+# 图表 7: 订单时段热力图
 def plot_time_heatmap(df: pd.DataFrame) -> None:
     """星期 x 小时 订单量热力图。"""
     dow_labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -224,7 +224,7 @@ def plot_time_heatmap(df: pd.DataFrame) -> None:
 
     pivot = df.groupby(["order_dow", "order_hour_of_day"]).size().unstack(fill_value=0)
 
-    # 安全映射 dow → 标签
+    # 安全映射dow → 标签
     pivot.index = [dow_labels[int(i)] if 0 <= int(i) <= 6 else f"D{i}"
                    for i in pivot.index]
 
@@ -241,7 +241,7 @@ def plot_time_heatmap(df: pd.DataFrame) -> None:
     safe_save(fig, "07_order_time_heatmap.png")
 
 
-# ---- 批量生成所有图表 ----
+# 批量生成所有图表
 def generate_all_charts(
     df: pd.DataFrame,
     cohort_matrix: pd.DataFrame,
@@ -249,7 +249,7 @@ def generate_all_charts(
     dept_reorder: pd.DataFrame,
     assoc_df: pd.DataFrame,
 ) -> None:
-    """一键生成全部 7 张图表，单张失败不影响后续。"""
+
     print("\n" + "=" * 60)
     print("  Generating charts...")
     print("=" * 60)

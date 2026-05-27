@@ -16,10 +16,9 @@ from config import OUTPUT_DIR, TOP_N
 
 
 def build_dept_user_matrix(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    构建用户-品类购买矩阵。
-    rows = user_id, cols = department_id, values = 购买次数
-    """
+
+    # 品类购买矩阵
+
     matrix = (
         df.groupby(["user_id", "department_id"])
         .size()
@@ -35,12 +34,6 @@ def calc_pairwise_association(
 ) -> pd.DataFrame:
     """
     计算品类两两之间的连带率。
-
-    连带率 = P(买B | 买A) = 同时买A和B的用户数 / 买过A的用户数
-
-    Returns
-    -------
-    association_df: columns=[dept_a, dept_b, pct_b_given_a, joint_users, dept_a_users]
     """
     results = []
     dept_names = dept_matrix.columns.tolist()
@@ -80,7 +73,7 @@ def calc_pairwise_association(
 
 
 def calc_dept_reorder_rate(df: pd.DataFrame) -> pd.DataFrame:
-    """计算每个品类的复购率排行。"""
+    """计算每个品类的复购率排行"""
     dept_reorder = (
         df.groupby("department_id")
         .agg(
@@ -107,7 +100,7 @@ def calc_dept_reorder_rate(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def calc_aisle_reorder_rate(df: pd.DataFrame) -> pd.DataFrame:
-    """计算每个子品类(aisle)的复购率排行。"""
+    """计算每个子品类的复购率排行"""
     aisle_reorder = (
         df.groupby("aisle_id")
         .agg(
@@ -129,7 +122,7 @@ def calc_aisle_reorder_rate(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def run_category_pipeline(df: pd.DataFrame) -> dict:
-    """一键执行品类分析全流程。"""
+    """一键执行品类分析全流程"""
     # 1. 品类复购率
     dept_reorder = calc_dept_reorder_rate(df)
 
